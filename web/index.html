@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StressSignal</title>
+  <meta name="description" content="Detecting stress from a wristband's skin conductance, heart and temperature signals, tested on people the model has never seen.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="wrap top">
+    <h1>StressSignal</h1>
+    <p class="lede">Detecting stress from a wristband's skin conductance, heart and temperature signals. Every result here is measured on people the model never saw during training.</p>
+    <p class="stats" id="stats"></p>
+  </header>
+
+  <main class="wrap">
+    <section class="tiles" id="tiles" aria-label="Headline results"></section>
+
+    <section class="block">
+      <div class="row-head">
+        <h2>One person, minute by minute</h2>
+        <select id="person" aria-label="Choose a participant"></select>
+      </div>
+      <p class="sub">Shaded bands are the three stress tasks. The line is the model's stress estimate for this person, made without ever training on them.</p>
+      <div class="legend" id="legend"></div>
+      <div class="chart-box tall"><canvas id="c-time" role="img" aria-label="Stress estimate over time for the selected participant"></canvas></div>
+      <div class="toggle" role="group" aria-label="Show a raw signal">
+        <span class="muted">Show raw signal:</span>
+        <button class="pill" data-sig="hr" aria-pressed="true">Heart rate</button>
+        <button class="pill" data-sig="eda" aria-pressed="false">Skin conductance</button>
+      </div>
+      <div class="chart-box short"><canvas id="c-sig" role="img" aria-label="Raw signal for the selected participant"></canvas></div>
+    </section>
+
+    <section class="block grid2">
+      <div>
+        <h2>Which sensor carries the signal</h2>
+        <p class="sub">How well stress is detected using one sensor at a time (AUROC: 0.5 is a coin flip, 1.0 is perfect).</p>
+        <div class="chart-box"><canvas id="c-sensor" role="img" aria-label="Detection quality by sensor"></canvas></div>
+      </div>
+      <div>
+        <h2>What the model looks at</h2>
+        <p class="sub">How much detection worsens when each measurement is scrambled. Longer bars matter more.</p>
+        <div class="chart-box"><canvas id="c-imp" role="img" aria-label="Most important measurements"></canvas></div>
+      </div>
+    </section>
+
+    <section class="block grid2">
+      <div>
+        <h2>Calibrating to each person helps</h2>
+        <p class="sub">Comparing each reading to the person's own rest period, versus using raw values.</p>
+        <div class="chart-box short"><canvas id="c-models" role="img" aria-label="Model comparison"></canvas></div>
+      </div>
+      <div>
+        <h2>Caught, task by task</h2>
+        <p class="sub">Share of stress minutes flagged in each task, and false alarms during rest.</p>
+        <div class="chart-box short"><canvas id="c-task" role="img" aria-label="Detection rate by task"></canvas></div>
+      </div>
+    </section>
+
+    <section class="block next">
+      <h2>Where this could go</h2>
+      <ul>
+        <li><b>Add a sweat-cortisol channel.</b> Skin conductance, which tracks sweat gland activity, is the strongest single signal here. A wearable cortisol patch would add a direct hormonal measure of stress alongside it.</li>
+        <li><b>Track recovery after concussion.</b> The same pipeline could follow stress responses across a patient's recovery, compared with that patient's own baseline.</li>
+        <li><b>Account for hormone cycles.</b> Stress and cortisol responses shift across the menstrual cycle. A cycle-aware baseline could reduce false alarms for female wearers.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Data: Stress-Predict dataset (Iqbal et al., 2022; MIT licence), 35 volunteers wearing an Empatica E4 wristband during a Stroop test, an interview and hyperventilation. One participant with irregular task markers is excluded, as in the original study. Research prototype, not a medical device.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

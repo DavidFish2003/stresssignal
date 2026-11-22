@@ -1,0 +1,22 @@
+[project]
+name = "stresssignal"
+version = "0.1.0"
+description = "Stress detection from wristband signals (Stress-Predict dataset), evaluated leave-one-person-out."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "joblib>=1.6.0",
+    "numpy>=2.5.5",
+    "pandas>=3.1.1",
+    "pyarrow>=26.0.1",
+    "requests>=2.34.2",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+]
+
+[project.scripts]
+stresssignal = "stresssignal:main"
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14.0"]
+build-backend = "uv_build"
