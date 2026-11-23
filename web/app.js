@@ -16,10 +16,10 @@ async function init() {
   }
   const main = R.models["Gradient boosting (personal baseline)"];
   const d = R.dataset;
-  $("#stats").textContent = `${d.people} people · ${d.windows.toLocaleString()} one-minute windows · leave-one-person-out evaluation`;
+  $("#stats").textContent = `${d.people} people · ${d.windows.toLocaleString()} one-minute readings · every result tested on people the model never saw`;
   $("#tiles").innerHTML = [
-    [main.auroc.mean.toFixed(2), "AUROC on unseen people (1.0 = perfect)"],
-    [pct(main.bal_acc.mean), "Balanced accuracy, stress vs rest"],
+    [main.auroc.mean.toFixed(2), "Detection score on new people (0.5 = chance, 1.0 = perfect)"],
+    [pct(main.bal_acc.mean), "Stress and rest correctly told apart"],
     [pct(1 - R.false_alarm_rate), "Rest minutes correctly left unflagged"],
     [`${d.baseline_min_median} min`, "Rest needed to calibrate to a person"],
   ].map(([b, s]) => `<div class="tile"><b>${b}</b><span>${s}</span></div>`).join("");
@@ -28,7 +28,7 @@ async function init() {
   const sorted = [...R.people].sort((a, b) => a.auroc - b.auroc);
   const typical = sorted[Math.floor(sorted.length / 2)].id;
   $("#person").innerHTML = R.people.map((p) =>
-    `<option value="${p.id}" ${p.id === typical ? "selected" : ""}>Participant ${p.id.slice(1)} · AUROC ${p.auroc.toFixed(2)}${p.id === typical ? " (typical)" : ""}</option>`).join("");
+    `<option value="${p.id}" ${p.id === typical ? "selected" : ""}>Participant ${p.id.slice(1)} · score ${p.auroc.toFixed(2)}${p.id === typical ? " (typical)" : ""}</option>`).join("");
   $("#person").addEventListener("change", renderPerson);
   document.querySelectorAll(".pill").forEach((b) => b.addEventListener("click", () => {
     sig = b.dataset.sig;
@@ -123,20 +123,24 @@ function renderSensors() {
   const order = ["All sensors", "All except movement", "Skin conductance", "Heart", "Skin temperature", "Movement"];
   const keys = order.filter((k) => R.sensors[k]);
   hbar("c-sensor", keys, keys.map((k) => R.sensors[k].mean), { max: 1, fmt: (v) => Number(v).toFixed(2),
-    tip: (it) => `AUROC ${it.raw.toFixed(2)} (± ${R.sensors[keys[it.dataIndex]].sd.toFixed(2)} across people)` });
+    tip: (it) => `Score ${it.raw.toFixed(2)} (± ${R.sensors[keys[it.dataIndex]].sd.toFixed(2)} across people)` });
 }
 
 function renderImportance() {
   const top = R.importance.slice(0, 8);
   hbar("c-imp", top.map((d) => d.feature), top.map((d) => Math.max(0, d.importance)), { fmt: (v) => Number(v).toFixed(3),
-    tip: (it) => [`AUROC drop when scrambled: ${it.raw.toFixed(3)}`, `Sensor: ${top[it.dataIndex].sensor}`] });
+    tip: (it) => [`Score drop when scrambled: ${it.raw.toFixed(3)}`, `Sensor: ${top[it.dataIndex].sensor}`] });
 }
 
 function renderModels() {
   const names = Object.keys(R.models);
-  const short = (n) => n.replace(" (personal baseline)", ", calibrated").replace(" (no baseline)", ", not calibrated");
+  const short = (n) => ({
+    "Gradient boosting (personal baseline)": "Main model, calibrated",
+    "Logistic regression (personal baseline)": "Simpler model, calibrated",
+    "Gradient boosting (no baseline)": "Main model, not calibrated",
+  })[n] || n;
   hbar("c-models", names.map(short), names.map((n) => R.models[n].auroc.mean), { max: 1, fmt: (v) => Number(v).toFixed(2),
-    tip: (it) => `AUROC ${it.raw.toFixed(2)} · balanced accuracy ${pct(R.models[names[it.dataIndex]].bal_acc.mean)}` });
+    tip: (it) => `Score ${it.raw.toFixed(2)} · ${pct(R.models[names[it.dataIndex]].bal_acc.mean)} told apart correctly` });
 }
 
 function renderTasks() {
